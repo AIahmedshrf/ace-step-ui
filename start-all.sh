@@ -4,6 +4,13 @@
 
 set -e
 
+# Load environment variables from .env if present
+if [ -f ".env" ]; then
+    set -o allexport
+    source .env
+    set +o allexport
+fi
+
 echo "=================================="
 echo "  ACE-Step Complete Startup"
 echo "=================================="
@@ -23,7 +30,7 @@ if [ ! -d "server/node_modules" ]; then
 fi
 
 # Get ACE-Step path from environment or use default
-ACESTEP_PATH="${ACESTEP_PATH:-../ACE-Step-1.5}"
+ACESTEP_PATH="${ACESTEP_PATH:-./ACE-Step-1.5}"
 
 # Check if ACE-Step exists
 if [ ! -d "$ACESTEP_PATH" ]; then
@@ -54,10 +61,18 @@ mkdir -p logs
 
 # Start ACE-Step API in background
 echo "[1/3] Starting ACE-Step API server..."
-cd "$ACESTEP_PATH"
-uv run acestep-api --port 8001 > "../ace-step-ui/logs/api.log" 2>&1 &
+# Use venv/bin directly (supports both venv and .venv)
+if [ -f "$ACESTEP_PATH/venv/bin/acestep-api" ]; then
+    ACESTEP_BIN="$ACESTEP_PATH/venv/bin/acestep-api"
+elif [ -f "$ACESTEP_PATH/.venv/bin/acestep-api" ]; then
+    ACESTEP_BIN="$ACESTEP_PATH/.venv/bin/acestep-api"
+else
+    echo "Error: acestep-api not found in $ACESTEP_PATH/venv or $ACESTEP_PATH/.venv"
+    exit 1
+fi
+UI_DIR="$(pwd)"
+"$ACESTEP_BIN" --port 8001 > "$UI_DIR/logs/api.log" 2>&1 &
 API_PID=$!
-cd - > /dev/null
 
 # Wait for API to start
 echo "Waiting for API to initialize..."
@@ -72,7 +87,7 @@ fi
 # Start backend in background
 echo "[2/3] Starting backend server..."
 cd server
-npm run dev > ../logs/backend.log 2>&1 &
+npm run dev > "$UI_DIR/logs/backend.log" 2>&1 &
 BACKEND_PID=$!
 cd ..
 

@@ -8,7 +8,7 @@ echo "  ACE-Step UI Setup"
 echo "=================================="
 
 # Check if ACE-Step exists
-ACESTEP_PATH="${ACESTEP_PATH:-../ACE-Step-1.5}"
+ACESTEP_PATH="${ACESTEP_PATH:-./ACE-Step-1.5}"
 
 if [ ! -d "$ACESTEP_PATH" ]; then
     echo "Error: ACE-Step not found at $ACESTEP_PATH"
@@ -18,12 +18,12 @@ if [ ! -d "$ACESTEP_PATH" ]; then
     echo "  git clone https://github.com/ace-step/ACE-Step-1.5"
     echo "  cd ACE-Step-1.5"
     echo "  uv venv && uv pip install -e ."
-    echo "  cd ../ace-step-ui"
+    echo "  cd .."
     echo "  ./setup.sh"
     exit 1
 fi
 
-if [ ! -d "$ACESTEP_PATH/.venv" ]; then
+if [ ! -d "$ACESTEP_PATH/.venv" ] && [ ! -d "$ACESTEP_PATH/venv" ]; then
     echo "Error: ACE-Step venv not found. Please set up ACE-Step first:"
     echo "  cd $ACESTEP_PATH"
     echo "  uv venv && uv pip install -e ."
